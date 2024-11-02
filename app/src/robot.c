@@ -10,10 +10,15 @@
 #include "referee_system.h"
 #include "buzzer.h"
 #include "supercap.h"
+#include "rate_limiter.h"
 
 Robot_State_t g_robot_state = {0};
 extern Remote_t g_remote;
 extern Supercap_t g_supercap;
+
+rate_limiter_t rate_limiter_x;
+rate_limiter_t rate_limiter_y;
+rate_limiter_t rate_limiter_omega;
 
 /**
  * @brief This function initializes the robot.
@@ -50,6 +55,10 @@ void Handle_Starting_Up_State()
     CAN_Service_Init();
     Referee_System_Init(&huart1);
     Supercap_Init(&g_supercap);
+
+    rate_limiter_init(&rate_limiter_x, 0.002f);
+    rate_limiter_init(&rate_limiter_y, 0.002f);
+    rate_limiter_init(&rate_limiter_omega, 0.002f);
 
     // Set robot state to disabled
     g_robot_state.state = DISABLED;
@@ -96,12 +105,15 @@ void Handle_Disabled_State()
 }
 
 void Process_Remote_Input()
-{
+{    
     // Process remote input
-    g_robot_state.input.vx = g_remote.controller.left_stick.x;
-    g_robot_state.input.vy = g_remote.controller.left_stick.y;
+    // g_robot_state.input.vx = g_remote.controller.left_stick.x;
+    // g_robot_state.input.vy = g_remote.controller.left_stick.y;
+    // g_robot_state.input.vomega = g_remote.controller.right_stick.x;
 
-    g_robot_state.input.vomega = g_remote.controller.right_stick.x;
+    g_robot_state.input.vx = rate_limiter(&rate_limiter_x, g_remote.controller.left_stick.x);
+    g_robot_state.input.vy = rate_limiter(&rate_limiter_y, g_remote.controller.left_stick.y);
+    g_robot_state.input.vomega = rate_limiter(&rate_limiter_omega, g_remote.controller.right_stick.x);
 }
 
 void Process_Chassis_Control()

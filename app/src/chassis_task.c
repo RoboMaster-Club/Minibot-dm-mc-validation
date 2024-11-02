@@ -10,8 +10,8 @@ extern Robot_State_t g_robot_state;
 extern Remote_t g_remote;
 
 #define CHASSIS_WHEEL_DIAMETER (0.05f)
-#define CHASSIS_RADIUS (0.035f)
-#define CHASSIS_MAX_SPEED (1.0f)
+#define CHASSIS_RADIUS (0.26f)
+#define CHASSIS_MAX_SPEED (0.5f)
 #define CHASSIS_MOUNTING_ANGLE (45.0f)
 
 float chassis_rad;
@@ -33,7 +33,7 @@ void Chassis_Task_Init()
         .can_bus = 1,
         .control_mode = VELOCITY_CONTROL,
         .velocity_pid = {
-            .kp = 1000.0f,
+            .kp = 500.0f,
             .kf = 100.0f,
             .output_limit = M2006_MAX_CURRENT,
             .integral_limit = 3000.0f,
@@ -68,6 +68,7 @@ void Chassis_Ctrl_Loop()
     // Control loop for the chassis
     calculate_omni_kinematics(&chassis_state, &physical_constants);
     desaturate_wheel_speeds(&chassis_state, &physical_constants);
+    convert_to_tps(&chassis_state);
 
     DJI_Motor_Set_Velocity(motors[0], chassis_state.phi_dot_1);
     DJI_Motor_Set_Velocity(motors[1], chassis_state.phi_dot_2);
