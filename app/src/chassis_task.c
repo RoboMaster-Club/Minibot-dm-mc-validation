@@ -48,7 +48,7 @@ void Chassis_Task_Init()
     }
 
     // Initialize the omni chassis state
-    physical_constants = init_omni(
+    physical_constants = omni_init(
         CHASSIS_WHEEL_DIAMETER,
         CHASSIS_RADIUS,
         CHASSIS_MOUNTING_ANGLE,
@@ -66,9 +66,9 @@ void Chassis_Ctrl_Loop()
     chassis_state.omega = g_robot_state.input.vomega;
 
     // Control loop for the chassis
-    calculate_omni_kinematics(&chassis_state, &physical_constants);
-    desaturate_wheel_speeds(&chassis_state, &physical_constants);
-    convert_to_tps(&chassis_state);
+    omni_calculate_kinematics(&chassis_state, &physical_constants);
+    omni_desaturate_wheel_speeds(&chassis_state, &physical_constants);
+    omni_convert_to_tps(&chassis_state);
 
     DJI_Motor_Set_Velocity(motors[0], chassis_state.phi_dot_1);
     DJI_Motor_Set_Velocity(motors[1], chassis_state.phi_dot_2);
