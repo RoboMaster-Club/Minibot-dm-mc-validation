@@ -20,6 +20,17 @@ rate_limiter_t rate_limiter_x;
 rate_limiter_t rate_limiter_y;
 rate_limiter_t rate_limiter_omega;
 
+#ifdef STM32H723xx
+#define BUZZER_TIMER_NUM (htim12)
+#define BUZZER_TIMER_CHANNEL (TIM_CHANNEL_2)
+#define REMOTE_UART (huart5)
+#else
+#define BUZZER_TIMER_NUM (htim4)
+#define BUZZER_TIMER_CHANNEL (TIM_CHANNEL_3)
+#define REMOTE_UART (huart3)
+#endif
+
+
 /**
  * @brief This function initializes the robot.
  * This means setting the state to STARTING_UP,
@@ -30,7 +41,7 @@ void Robot_Init()
 {
     g_robot_state.state = STARTING_UP;
 
-    Buzzer_Init();
+    Buzzer_Init(&BUZZER_TIMER_NUM, BUZZER_TIMER_CHANNEL);
     Melody_t system_init_melody = {
         .notes = SYSTEM_INITIALIZING,
         .loudness = 0.5f,
